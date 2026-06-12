@@ -30,13 +30,25 @@ jobs:
         run: pip install python-docx beautifulsoup4
       - name: Build DOCX
         run: python scripts/build_control_n_docx.py
+      - name: Prepare direct DOCX package
+        run: |
+          rm -rf docx_package
+          mkdir -p docx_package
+          unzip -q 'artifacts/控N分析报告_JSON结构映射说明_最终版.docx' -d docx_package
       - name: Commit generated DOCX
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Generate Control-N JSON mapping DOCX
           file_pattern: artifacts/*.docx
-      - name: Upload DOCX artifact
+      - name: Upload normal DOCX artifact
         uses: actions/upload-artifact@v4
         with:
           name: control-n-json-mapping-docx
           path: artifacts/控N分析报告_JSON结构映射说明_最终版.docx
+      - name: Upload direct DOCX package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: control-n-json-mapping-docx-direct
+          path: docx_package/
+          include-hidden-files: true
+          compression-level: 6
