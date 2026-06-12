@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-docx:
@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -28,6 +30,11 @@ jobs:
         run: pip install python-docx beautifulsoup4
       - name: Build DOCX
         run: python scripts/build_control_n_docx.py
+      - name: Commit generated DOCX
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Generate Control-N JSON mapping DOCX
+          file_pattern: artifacts/*.docx
       - name: Upload DOCX artifact
         uses: actions/upload-artifact@v4
         with:
