@@ -1,0 +1,33 @@
+name: Build Control-N DOCX
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - 'scripts/build_control_n_docx.py'
+      - 'artifacts/control_n_report_json_mapping_final.doc'
+      - '.github/workflows/build-control-n-docx.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-docx:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install python-docx beautifulsoup4
+      - name: Build DOCX
+        run: python scripts/build_control_n_docx.py
+      - name: Upload DOCX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: control-n-json-mapping-docx
+          path: artifacts/控N分析报告_JSON结构映射说明_最终版.docx
