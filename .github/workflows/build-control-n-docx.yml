@@ -1,6 +1,8 @@
 name: Build Control-N DOCX
 
 on:
+  pull_request:
+    branches: [ master ]
   push:
     branches: [ master ]
     paths:
