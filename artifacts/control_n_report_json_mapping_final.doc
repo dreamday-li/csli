@@ -1,0 +1,298 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<meta name="ProgId" content="Word.Document">
+<meta name="Generator" content="Microsoft Word 15">
+<title>控N分析报告 JSON结构映射说明</title>
+<style>
+@page { size: A4; margin: 2.2cm 2.0cm 2.0cm 2.0cm; }
+body { font-family: SimSun, '宋体', sans-serif; font-size: 11pt; line-height: 1.65; color:#222; }
+h1 { font-family: SimHei,'黑体'; font-size: 22pt; text-align:center; color:#1F4E79; margin-top:100px; }
+h2 { font-family: SimHei,'黑体'; font-size:16pt; color:#1F4E79; border-bottom:1px solid #9DC3E6; padding-bottom:5px; margin-top:24px; }
+h3 { font-family: SimHei,'黑体'; font-size:13pt; color:#2F5597; margin-top:18px; }
+h4 { font-family: SimHei,'黑体'; font-size:11.5pt; color:#365F91; margin-top:14px; }
+p { margin:6px 0; text-align:justify; }
+.cover-sub { text-align:center; font-size:13pt; color:#666; margin-top:26px; }
+.cover-note { text-align:center; font-size:11pt; color:#777; margin-top:180px; }
+.toc { width:82%; margin:25px auto; font-size:12pt; }
+.toc div { padding:7px 10px; border-bottom:1px dotted #bbb; }
+.box { background:#F3F7FB; border-left:4px solid #5B9BD5; padding:10px 14px; margin:10px 0; }
+.path { font-family: Consolas,'Courier New',monospace; color:#9C0006; background:#FFF2CC; padding:1px 4px; }
+code, pre { font-family: Consolas,'Courier New',monospace; }
+pre { background:#F7F7F7; border:1px solid #DDD; padding:10px; white-space:pre-wrap; word-break:break-all; }
+table { border-collapse:collapse; width:100%; margin:10px 0 16px; table-layout:fixed; }
+th { background:#D9EAF7; font-weight:bold; text-align:center; }
+th, td { border:1px solid #666; padding:6px 7px; vertical-align:top; word-break:break-all; }
+.small { font-size:9.5pt; }
+.note { color:#666; font-style:italic; }
+.pagebreak { page-break-before:always; }
+ul { margin-top:4px; }
+li { margin:4px 0; }
+</style>
+</head>
+<body>
+<h1>控N分析报告 JSON结构映射说明</h1>
+<p class="cover-sub">与《控N关键因子相关性分析及最优窗口建议报告》章节结构完全一致</p>
+<p class="cover-sub">逐项说明报告文字、图形、表格、统计结论及窗口建议在JSON中的具体位置</p>
+<p class="cover-note">适用于Vue前端绘制、接口联调、报告复现与业务口径核对</p>
+<div class="pagebreak"></div>
+<h2>目录</h2>
+<div class="toc">
+<div>报告结论摘要</div>
+<div>1. 分析目标与模型调整</div>
+<div>2. 数据范围与清洗口径</div>
+<div>3. 三个分析目标的总体分布</div>
+<div>4. 过程因子与2号样N、出站N、ΔN的关系</div>
+<div>5. 氮化硅锰加料的最终解释</div>
+<div>6. 真空与提升气体的口径调整</div>
+<div>7. 工位差异分析</div>
+<div>8. 多目标模型调整结果</div>
+<div>9. 最优工艺窗口建议</div>
+<div>10. 最终结论</div>
+</div>
+
+<div class="pagebreak"></div>
+<h2>报告结论摘要</h2>
+<div class="box">本章对应最终分析报告首页“报告结论摘要”，用于展示三类分析目标、关键因子、最终结论和后续分析目标。</div>
+<table>
+<tr><th style="width:26%">报告内容</th><th style="width:36%">JSON具体位置</th><th>字段及使用说明</th></tr>
+<tr><td>报告标题</td><td><span class="path">$.meta.report_title</span></td><td>直接作为Word和Vue页面主标题。</td></tr>
+<tr><td>生成时间</td><td><span class="path">$.meta.generated_at</span></td><td>用于报告生成时间、接口返回时间显示。</td></tr>
+<tr><td>样本数232炉</td><td><span class="path">$.meta.sample_count</span><br><span class="path">$.data_quality.sample_count</span></td><td>两个节点数值应保持一致。</td></tr>
+<tr><td>业务分析链条</td><td><span class="path">$.meta.business_chain</span></td><td>对应“2号样N→过程参数→出站N与ΔN”。</td></tr>
+<tr><td>三类分析目标</td><td><span class="path">$.meta.analysis_targets</span></td><td>数组中依次为N2、N4、DELTA_N；字段包括code、name、role。</td></tr>
+<tr><td>摘要完整对象</td><td><span class="path">$.report_conclusion_summary</span></td><td>前端摘要组件应优先直接读取该节点。</td></tr>
+<tr><td>最终结论</td><td><span class="path">$.report_conclusion_summary.final_conclusions</span><br><span class="path">$.correlation_analysis.main_conclusions</span></td><td>若需要完全复现报告首页，优先使用final_conclusions；相关性补充结论取main_conclusions。</td></tr>
+<tr><td>关键因子</td><td><span class="path">$.report_conclusion_summary.key_factors</span><br><span class="path">$.field_mapping</span></td><td>关键因子列表与字段编码可结合展示。</td></tr>
+<tr><td>后续分析目标</td><td><span class="path">$.report_conclusion_summary.follow_up_analysis_objective</span></td><td>对应“2号样N均值到出站N均值的变化和补偿关系”。</td></tr>
+</table>
+<h3>摘要中三个分析目标的逐项映射</h3>
+<table>
+<tr><th>报告项</th><th>JSON Path</th><th>主要字段</th></tr>
+<tr><td>2号样N</td><td><span class="path">$.meta.analysis_targets[0]</span></td><td>code=N2；name=2号样N；role=控N起点，用于输入分层和工况识别。</td></tr>
+<tr><td>出站N</td><td><span class="path">$.meta.analysis_targets[1]</span></td><td>code=N4；name=出站N；role=最终结果指标。</td></tr>
+<tr><td>ΔN</td><td><span class="path">$.meta.analysis_targets[2]</span></td><td>code=DELTA_N；name=ΔN=出站N-2号样N；role=2号样后过程净变化指标。</td></tr>
+</table>
+
+<h2>1. 分析目标与模型调整</h2>
+<div class="box">本章与报告第1章完全对应，说明三层目标、过程因子范围以及当前模型口径。</div>
+<table>
+<tr><th>报告内容</th><th>JSON具体位置</th><th>详细说明</th></tr>
+<tr><td>三层目标总述</td><td><span class="path">$.mechanism_framework.analysis_targets</span><br><span class="path">$.meta.analysis_targets</span></td><td>前者为可直接展示的说明文字，后者为结构化目标数组。</td></tr>
+<tr><td>2号样N作为控N起点</td><td><span class="path">$.mechanism_framework.input_n</span><br><span class="path">$.meta.analysis_targets[0].role</span></td><td>用于输入分层和工况识别，不作为后续过程的因果结果。</td></tr>
+<tr><td>出站N作为最终结果</td><td><span class="path">$.meta.analysis_targets[1]</span><br><span class="path">$.model_analysis.target_n4</span></td><td>用于最终控N结果评价及预测模型。</td></tr>
+<tr><td>ΔN作为过程净变化</td><td><span class="path">$.meta.analysis_targets[2]</span><br><span class="path">$.raw_records[*].DELTA_N</span></td><td>计算公式为N4-N2，用于判断降N、稳N、补N/增N。</td></tr>
+<tr><td>过程因子范围</td><td><span class="path">$.field_mapping</span><br><span class="path">$.model_analysis.*.feature_codes</span></td><td>包括加料、低频真空、持续时间、工位；提升气体保留后续接入位。</td></tr>
+<tr><td>N2/N4口径自动校正</td><td><span class="path">$.meta.n_field_auto_swapped</span><br><span class="path">$.meta.n_field_mapping_note</span></td><td>页面应明确提示原始字段与标准字段的校正关系。</td></tr>
+</table>
+<h3>前端取数建议</h3>
+<pre>const targets = data.meta.analysis_targets;
+const n2Target = targets.find(x =&gt; x.code === 'N2');
+const n4Target = targets.find(x =&gt; x.code === 'N4');
+const deltaTarget = targets.find(x =&gt; x.code === 'DELTA_N');</pre>
+
+<h2>2. 数据范围与清洗口径</h2>
+<div class="box">本章对应报告第2章及表1“数据范围与清洗口径”。</div>
+<table>
+<tr><th>表1项目</th><th>JSON具体位置</th><th>说明</th></tr>
+<tr><td>低频炉次样本</td><td><span class="path">$.report_tables.table_1_data_scope</span><br><span class="path">$.data_quality.sample_count</span></td><td>报告显示232炉。</td></tr>
+<tr><td>N2/N4字段口径</td><td><span class="path">$.meta.n_field_mapping_note</span></td><td>原始N4列作为2号样N，原始N2列作为出站N。</td></tr>
+<tr><td>负值高真空持续时间</td><td><span class="path">$.data_quality.negative_time_span_count</span><br><span class="path">$.data_quality.negative_time_span_note</span></td><td>9条；不参与窗口、净降N速度和建模，原始记录仍保留。</td></tr>
+<tr><td>提升气体高频字段</td><td><span class="path">$.data_quality.lift_gas_field_status</span></td><td>当前未提供，不能直接量化与出站N的关系。</td></tr>
+<tr><td>清洗口径</td><td><span class="path">$.field_mapping</span><br><span class="path">$.raw_records[*].DEVO_HAS_FEED</span><br><span class="path">$.raw_records[*].TIME_SPAN_VALID</span></td><td>DEVO_WT空值按0并生成是否加料标识；负时长置为无效；ΔN统一为N4-N2。</td></tr>
+</table>
+<h3>字段映射</h3>
+<table class="small">
+<tr><th>报告字段</th><th>标准字段</th><th>JSON位置</th></tr>
+<tr><td>炉号</td><td>HEAT_NO</td><td><span class="path">$.field_mapping</span>中standard_field=HEAT_NO；明细在<span class="path">$.raw_records[*].HEAT_NO</span></td></tr>
+<tr><td>工位</td><td>DEV_CODE</td><td><span class="path">$.raw_records[*].DEV_CODE</span></td></tr>
+<tr><td>2号样N</td><td>N2</td><td><span class="path">$.raw_records[*].N2</span></td></tr>
+<tr><td>出站N</td><td>N4</td><td><span class="path">$.raw_records[*].N4</span></td></tr>
+<tr><td>氮化硅锰加料</td><td>DEVO_WT</td><td><span class="path">$.raw_records[*].DEVO_WT</span></td></tr>
+<tr><td>2号样时真空度</td><td>N2_VACUUM</td><td><span class="path">$.raw_records[*].N2_VACUUM</span></td></tr>
+<tr><td>破空时真空度</td><td>BREAK_VACUUM</td><td><span class="path">$.raw_records[*].BREAK_VACUUM</span></td></tr>
+<tr><td>高真空持续时间</td><td>TIME_SPAN_VALID</td><td><span class="path">$.raw_records[*].TIME_SPAN_VALID</span></td></tr>
+<tr><td>真空度变化</td><td>VACUUM_DELTA</td><td><span class="path">$.raw_records[*].VACUUM_DELTA</span></td></tr>
+<tr><td>净降N速度</td><td>N_CHANGE_RATE</td><td><span class="path">$.raw_records[*].N_CHANGE_RATE</span></td></tr>
+</table>
+
+<h2>3. 三个分析目标的总体分布</h2>
+<div class="box">本章对应图1、图2和表2。</div>
+<table>
+<tr><th>报告项</th><th>JSON具体位置</th><th>取数规则</th></tr>
+<tr><td>图1 2号样N与出站N时序对比</td><td><span class="path">$.charts.figure_1_time_series</span></td><td>标题取title，图片取path，重绘数据取data；序列字段为N2、N4。</td></tr>
+<tr><td>图2 2号样N与出站N散点关系</td><td><span class="path">$.charts.figure_2_scatter_n2_n4</span></td><td>x_field=N2；y_field=N4；series_field=DEV_CODE；参考线取reference_lines。</td></tr>
+<tr><td>表2 核心目标与过程变量统计</td><td><span class="path">$.report_tables.table_2_descriptive_statistics</span><br><span class="path">$.descriptive_statistics.rows</span></td><td>Word复现优先使用report_tables；交互页面可直接读取descriptive_statistics.rows。</td></tr>
+<tr><td>总体分布解释</td><td><span class="path">$.correlation_analysis.main_conclusions[0]</span><br><span class="path">$.mechanism_framework.analysis_targets</span></td><td>说明N2、N4、ΔN需要分开解释。</td></tr>
+</table>
+<h3>表2每列对应字段</h3>
+<table class="small">
+<tr><th>报告列</th><th>JSON字段</th></tr>
+<tr><td>字段</td><td>field_name</td></tr><tr><td>样本数</td><td>count</td></tr><tr><td>均值</td><td>mean</td></tr><tr><td>P25</td><td>p25</td></tr><tr><td>中位数</td><td>median</td></tr><tr><td>P75</td><td>p75</td></tr><tr><td>最小</td><td>min</td></tr><tr><td>最大</td><td>max</td></tr>
+</table>
+
+<h2>4. 过程因子与2号样N、出站N、ΔN的关系</h2>
+<div class="box">本章对应图3、表3以及四条结果解释。</div>
+<table>
+<tr><th>报告项</th><th>JSON具体位置</th><th>详细说明</th></tr>
+<tr><td>图3 Spearman相关系数</td><td><span class="path">$.charts.figure_3_spearman_comparison</span></td><td>重绘数据取<span class="path">$.correlation_analysis.comparison_rows</span>。</td></tr>
+<tr><td>表3 三目标相关性对照</td><td><span class="path">$.report_tables.table_3_correlation_comparison</span></td><td>备选数据源为comparison_rows。</td></tr>
+<tr><td>2号样N详细相关性</td><td><span class="path">$.correlation_analysis.target_n2.rows</span></td><td>每行含factor_code、rho、p、显著性、工程解释。</td></tr>
+<tr><td>出站N详细相关性</td><td><span class="path">$.correlation_analysis.target_n4.rows</span></td><td>结构与target_n2一致。</td></tr>
+<tr><td>ΔN详细相关性</td><td><span class="path">$.correlation_analysis.target_delta_n.rows</span></td><td>加料、破空真空度、真空变化是重点。</td></tr>
+<tr><td>章末结论</td><td><span class="path">$.correlation_analysis.main_conclusions</span></td><td>数组4条与报告章末4条解释逐项对应。</td></tr>
+</table>
+<h3>表3字段映射</h3>
+<table class="small">
+<tr><th>报告列</th><th>JSON字段</th></tr>
+<tr><td>过程因子</td><td>factor_name</td></tr><tr><td>与2号样N rho</td><td>rho_n2</td></tr><tr><td>与2号样N p</td><td>p_n2</td></tr><tr><td>与出站N rho</td><td>rho_n4</td></tr><tr><td>与出站N p</td><td>p_n4</td></tr><tr><td>与ΔN rho</td><td>rho_delta_n</td></tr><tr><td>与ΔN p</td><td>p_delta_n</td></tr>
+</table>
+<h3>按因子编码定位</h3>
+<pre>DEVO_WT          氮化硅锰加料量
+DEVO_HAS_FEED    是否有加料记录
+N2_VACUUM        2号样时真空度
+BREAK_VACUUM     破空时真空度
+VACUUM_DELTA     真空度变化
+TIME_SPAN_VALID  2号样到破空高真空持续时间</pre>
+
+<h2>5. 氮化硅锰加料的最终解释</h2>
+<table>
+<tr><th>报告项</th><th>JSON具体位置</th><th>说明</th></tr>
+<tr><td>图4 加料量分箱与出站N/ΔN</td><td><span class="path">$.charts.figure_4_devo_bin</span></td><td>重绘数据取<span class="path">$.binned_analysis.DEVO_WT.rows</span>。</td></tr>
+<tr><td>表4 加料分箱结果</td><td><span class="path">$.report_tables.table_4_devo_bin</span></td><td>若节点不存在，则直接绑定binned_analysis.DEVO_WT.rows。</td></tr>
+<tr><td>补N/合金化机理解释</td><td><span class="path">$.mechanism_framework.feeding</span></td><td>可直接作为报告说明文字。</td></tr>
+<tr><td>加料与ΔN证据</td><td><span class="path">$.correlation_analysis.target_delta_n.rows</span>中factor_code=DEVO_WT</td><td>重点读取spearman_rho、p_display和engineering_interpretation。</td></tr>
+<tr><td>是否加料与ΔN证据</td><td><span class="path">$.correlation_analysis.target_delta_n.rows</span>中factor_code=DEVO_HAS_FEED</td><td>说明加料行为本身与过程补偿的关系。</td></tr>
+<tr><td>0-10核心、0-20观察</td><td><span class="path">$.optimal_windows.rows</span>中factor_code=DEVO_WT</td><td>显示字段使用core_window_p25_p75和warning_window_p10_p90。</td></tr>
+</table>
+<h3>表4行字段</h3>
+<p><span class="path">bin</span>、<span class="path">sample_count</span>、<span class="path">n2_mean</span>、<span class="path">n4_mean</span>、<span class="path">delta_n_mean</span>、<span class="path">n_change_rate_mean</span>、<span class="path">break_vacuum_mean</span>。</p>
+
+<h2>6. 真空与提升气体的口径调整</h2>
+<table>
+<tr><th>报告项</th><th>JSON具体位置</th><th>说明</th></tr>
+<tr><td>真空采用低频口径</td><td><span class="path">$.mechanism_framework.vacuum</span></td><td>若字段为压力/读数，读数越大通常表示实际真空越差。</td></tr>
+<tr><td>破空真空度统计证据</td><td><span class="path">$.correlation_analysis.target_delta_n.rows</span>中factor_code=BREAK_VACUUM</td><td>与ΔN相关性及工程解释。</td></tr>
+<tr><td>真空度变化统计证据</td><td><span class="path">$.correlation_analysis.target_delta_n.rows</span>中factor_code=VACUUM_DELTA</td><td>对应两点真空变化与过程净变化关系。</td></tr>
+<tr><td>提升气体未接入说明</td><td><span class="path">$.mechanism_framework.lift_gas</span><br><span class="path">$.data_quality.lift_gas_field_status</span></td><td>当前不固化统一窗口。</td></tr>
+<tr><td>表5 后续数据采集与口径确认</td><td><span class="path">$.report_tables.table_5_next_data_requirements</span><br><span class="path">$.next_data_requirements</span></td><td>字段通常为field、requirement、purpose。</td></tr>
+</table>
+
+<h2>7. 工位差异分析</h2>
+<table>
+<tr><th>报告项</th><th>JSON具体位置</th><th>说明</th></tr>
+<tr><td>图5 不同工位出站N分布</td><td><span class="path">$.charts.figure_5_station_boxplot</span></td><td>若用图片显示读取path；若重绘箱线图，从raw_records按DEV_CODE分组计算N4五数。</td></tr>
+<tr><td>表6 工位分组统计</td><td><span class="path">$.report_tables.table_6_station_difference</span><br><span class="path">$.binned_analysis.DEV_CODE.rows</span></td><td>包含R1、R2、R3、R4。</td></tr>
+<tr><td>工位机理说明</td><td><span class="path">$.mechanism_framework.station</span></td><td>设备能力、真空状态、操作习惯和采集口径差异。</td></tr>
+</table>
+<h3>表6字段</h3>
+<p><span class="path">station</span>、<span class="path">sample_count</span>、<span class="path">n2_mean</span>、<span class="path">n4_mean</span>、<span class="path">delta_n_mean</span>、<span class="path">n_change_rate_mean</span>、<span class="path">target_hit_rate_display</span>、<span class="path">devo_wt_mean</span>、<span class="path">break_vacuum_mean</span>。</p>
+
+<h2>8. 多目标模型调整结果</h2>
+<table>
+<tr><th>报告项</th><th>JSON具体位置</th><th>说明</th></tr>
+<tr><td>表7 多目标模型解释力</td><td><span class="path">$.report_tables.table_7_model_summary</span></td><td>若无该节点，从三个target模型节点组装。</td></tr>
+<tr><td>图6 2号样N模型重要性</td><td><span class="path">$.charts.figure_6_model_importance_n2</span></td><td>模型数据位于<span class="path">$.model_analysis.target_n2</span>。</td></tr>
+<tr><td>图7 出站N模型重要性</td><td><span class="path">$.charts.figure_7_model_importance_n4</span></td><td>模型数据位于<span class="path">$.model_analysis.target_n4</span>。</td></tr>
+<tr><td>图8 ΔN模型重要性</td><td><span class="path">$.charts.figure_8_model_importance_delta_n</span></td><td>模型数据位于<span class="path">$.model_analysis.target_delta_n</span>。</td></tr>
+<tr><td>模型结论</td><td><span class="path">$.model_analysis.main_conclusions</span></td><td>与第8章结论段对应。</td></tr>
+</table>
+<h3>每个模型节点字段</h3>
+<p><span class="path">target_code</span>、<span class="path">target_name</span>、<span class="path">algorithm</span>、<span class="path">feature_codes</span>、<span class="path">sample_count</span>、<span class="path">cv_splits</span>、<span class="path">cv_r2_mean</span>、<span class="path">cv_r2_std</span>、<span class="path">permutation_importance</span>、<span class="path">interpretation</span>。</p>
+<h3>变量重要性字段</h3>
+<p><span class="path">factor_code</span>、<span class="path">factor_name</span>、<span class="path">permutation_importance</span>、<span class="path">importance_std</span>、<span class="path">importance_ratio</span>、<span class="path">importance_ratio_display</span>。</p>
+
+<h2>9. 最优工艺窗口建议</h2>
+<table>
+<tr><th>报告项</th><th>JSON具体位置</th><th>说明</th></tr>
+<tr><td>窗口提取口径</td><td><span class="path">$.optimal_windows.extraction_basis</span></td><td>包含target_band、n_drop_band、stable_sample_count、core_window、warning_window、note。</td></tr>
+<tr><td>图9 控N过程参数建议窗口</td><td><span class="path">$.charts.figure_9_optimal_windows</span></td><td>图数据也可直接取<span class="path">$.optimal_windows.rows</span>。</td></tr>
+<tr><td>表8 最优工艺窗口建议</td><td><span class="path">$.report_tables.table_8_optimal_windows</span></td><td>用于完全复现Word表格。</td></tr>
+<tr><td>表9 工程执行建议</td><td><span class="path">$.report_tables.table_9_execution_suggestions</span><br><span class="path">$.engineering_execution_suggestions</span></td><td>包含对象、执行建议、执行说明。</td></tr>
+</table>
+<h3>表8字段</h3>
+<p><span class="path">factor_code</span>、<span class="path">control_variable</span>、<span class="path">core_window_p25_p75</span>、<span class="path">warning_window_p10_p90</span>、<span class="path">center</span>、<span class="path">sample_count</span>、<span class="path">p10</span>、<span class="path">p25</span>、<span class="path">p75</span>、<span class="path">p90</span>、<span class="path">note</span>。</p>
+<h3>报告当前关键窗口与JSON定位</h3>
+<table class="small">
+<tr><th>控制变量</th><th>报告窗口</th><th>JSON定位方式</th></tr>
+<tr><td>2号样N</td><td>核心74-76；观察73-78</td><td><span class="path">$.optimal_windows.rows</span>中factor_code=N2</td></tr>
+<tr><td>氮化硅锰加料</td><td>核心0-10；观察0-20</td><td>factor_code=DEVO_WT</td></tr>
+<tr><td>2号样时真空度</td><td>核心10.12-13.45；观察9.58-13.83</td><td>factor_code=N2_VACUUM</td></tr>
+<tr><td>破空时真空度</td><td>核心12.93-17.44；观察11.97-18.28</td><td>factor_code=BREAK_VACUUM</td></tr>
+<tr><td>真空度变化</td><td>核心0.30-4.75；观察-0.12-5.77</td><td>factor_code=VACUUM_DELTA</td></tr>
+<tr><td>高真空持续时间</td><td>核心7-11分钟；观察6-13.6分钟</td><td>factor_code=TIME_SPAN_VALID</td></tr>
+<tr><td>提升气体</td><td>暂不固化；后台监控</td><td>factor_code=LIFT_GAS_HIGH_FREQ，或mechanism_framework.lift_gas</td></tr>
+</table>
+<p class="note">报告展示窗口可能经过工程化取整。完全复现报告文字时，优先使用core_window_p25_p75和warning_window_p10_p90；绘图区间时使用p10、p25、p75、p90数值字段。</p>
+
+<h2>10. 最终结论</h2>
+<div class="box">第10章不是单一JSON节点的机械复制，而是由相关性、模型、机理和窗口结论组合生成。</div>
+<table>
+<tr><th>最终结论组成</th><th>JSON具体位置</th><th>用途</th></tr>
+<tr><td>三目标分析框架</td><td><span class="path">$.mechanism_framework.analysis_targets</span><br><span class="path">$.correlation_analysis.main_conclusions[0]</span></td><td>说明N2、N4、ΔN的职责。</td></tr>
+<tr><td>氮化硅锰最终结论</td><td><span class="path">$.mechanism_framework.feeding</span><br><span class="path">$.correlation_analysis.target_delta_n.rows</span>中DEVO_WT</td><td>说明加料更适合解释为减缓降N速度或补偿N损失。</td></tr>
+<tr><td>真空最终结论</td><td><span class="path">$.mechanism_framework.vacuum</span><br><span class="path">$.correlation_analysis.main_conclusions[2]</span></td><td>说明压力/读数口径与RH脱气机理。</td></tr>
+<tr><td>高真空持续时间结论</td><td><span class="path">$.correlation_analysis.main_conclusions[3]</span></td><td>作为节奏变量，与真空强度、工位和N2联动。</td></tr>
+<tr><td>工位结论</td><td><span class="path">$.mechanism_framework.station</span><br><span class="path">$.binned_analysis.DEV_CODE.rows</span></td><td>支持按工位和目标N分层。</td></tr>
+<tr><td>模型结论</td><td><span class="path">$.model_analysis.main_conclusions</span></td><td>说明各目标模型解释力和变量作用。</td></tr>
+<tr><td>窗口结论</td><td><span class="path">$.optimal_windows.rows</span><br><span class="path">$.engineering_execution_suggestions</span></td><td>形成初始观察窗口和执行口径。</td></tr>
+<tr><td>首页最终结论</td><td><span class="path">$.report_conclusion_summary.final_conclusions</span></td><td>前端和Word摘要的首选文本来源。</td></tr>
+</table>
+
+<h3>报告图形总索引</h3>
+<table class="small">
+<tr><th>图号</th><th>名称</th><th>JSON Path</th></tr>
+<tr><td>图1</td><td>2号样N与出站N时序对比</td><td>$.charts.figure_1_time_series</td></tr>
+<tr><td>图2</td><td>2号样N与出站N散点关系</td><td>$.charts.figure_2_scatter_n2_n4</td></tr>
+<tr><td>图3</td><td>三目标Spearman相关性</td><td>$.charts.figure_3_spearman_comparison</td></tr>
+<tr><td>图4</td><td>加料量分箱与出站N/ΔN</td><td>$.charts.figure_4_devo_bin</td></tr>
+<tr><td>图5</td><td>不同工位出站N分布</td><td>$.charts.figure_5_station_boxplot</td></tr>
+<tr><td>图6</td><td>2号样N模型变量重要性</td><td>$.charts.figure_6_model_importance_n2</td></tr>
+<tr><td>图7</td><td>出站N模型变量重要性</td><td>$.charts.figure_7_model_importance_n4</td></tr>
+<tr><td>图8</td><td>ΔN模型变量重要性</td><td>$.charts.figure_8_model_importance_delta_n</td></tr>
+<tr><td>图9</td><td>控N过程参数建议窗口</td><td>$.charts.figure_9_optimal_windows</td></tr>
+</table>
+
+<h3>报告表格总索引</h3>
+<table class="small">
+<tr><th>表号</th><th>名称</th><th>JSON Path</th></tr>
+<tr><td>表1</td><td>数据范围与清洗口径</td><td>$.report_tables.table_1_data_scope</td></tr>
+<tr><td>表2</td><td>核心目标与过程变量统计</td><td>$.report_tables.table_2_descriptive_statistics</td></tr>
+<tr><td>表3</td><td>三个目标下的Spearman相关性对照</td><td>$.report_tables.table_3_correlation_comparison</td></tr>
+<tr><td>表4</td><td>加料分箱结果</td><td>$.report_tables.table_4_devo_bin</td></tr>
+<tr><td>表5</td><td>后续数据采集与口径确认</td><td>$.report_tables.table_5_next_data_requirements</td></tr>
+<tr><td>表6</td><td>工位分组统计</td><td>$.report_tables.table_6_station_difference</td></tr>
+<tr><td>表7</td><td>多目标模型解释力</td><td>$.report_tables.table_7_model_summary</td></tr>
+<tr><td>表8</td><td>最优工艺窗口建议</td><td>$.report_tables.table_8_optimal_windows</td></tr>
+<tr><td>表9</td><td>工程执行建议</td><td>$.report_tables.table_9_execution_suggestions</td></tr>
+</table>
+
+<h3>Vue页面章节映射</h3>
+<p>导航配置：<span class="path">$.vue_report_view.navigation</span>；组件配置：<span class="path">$.vue_report_view.sections</span>；报告章节路径总表：<span class="path">$.report_sections</span>；图表目录：<span class="path">$.report_visual_index</span>。</p>
+<table class="small">
+<tr><th>章节</th><th>Vue组件建议</th></tr>
+<tr><td>报告结论摘要</td><td>ReportConclusionSummary</td></tr>
+<tr><td>分析目标与模型调整</td><td>AnalysisTargets</td></tr>
+<tr><td>数据范围与清洗口径</td><td>DataQuality</td></tr>
+<tr><td>三个分析目标的总体分布</td><td>TargetDistribution</td></tr>
+<tr><td>过程因子相关性</td><td>CorrelationAnalysis</td></tr>
+<tr><td>氮化硅锰加料</td><td>FeedingAnalysis</td></tr>
+<tr><td>真空与提升气体</td><td>VacuumAndLiftGas</td></tr>
+<tr><td>工位差异</td><td>StationAnalysis</td></tr>
+<tr><td>多目标模型</td><td>MultiTargetModels</td></tr>
+<tr><td>最优工艺窗口</td><td>OptimalWindows</td></tr>
+<tr><td>最终结论</td><td>FinalConclusions</td></tr>
+</table>
+
+<h3>前端通用使用规则</h3>
+<ul>
+<li>表格优先使用<span class="path">$.report_tables</span>，避免浏览器重新聚合后与Word报告不一致。</li>
+<li>图形优先使用<span class="path">$.charts</span>；显示已生成图片读取path，ECharts重绘读取data。</li>
+<li>因子定位必须使用factor_code，不要固定使用数组下标。</li>
+<li>p值显示优先使用spearman_p_display、pearson_p_display。</li>
+<li>百分比显示优先使用target_hit_rate_display、importance_ratio_display。</li>
+<li>null、NaN、undefined统一显示为“-”或“暂无数据”。</li>
+<li>提升气体当前只能显示“后续接入/后台监控/暂不固化”，不能展示伪造窗口。</li>
+</ul>
+</body>
+</html>
